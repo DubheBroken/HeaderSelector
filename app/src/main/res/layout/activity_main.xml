@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context="com.dubhe.simple.MainActivity_kotlin">
 
     <ImageView
         android:id="@+id/img"
@@ -38,27 +38,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
-    <CheckBox
-        android:id="@+id/checkZip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="32dp"
-        android:text="压缩图片"
-        app:layout_constraintStart_toEndOf="@+id/checkClip"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
     <RadioGroup
         android:id="@+id/radioGroup"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="24dp"
         android:layout_marginEnd="32dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/checkClip">
+        app:layout_constraintStart_toEndOf="@+id/checkClip"
+        app:layout_constraintTop_toTopOf="@+id/checkClip">
 
         <RadioButton
             android:id="@+id/radioCir"

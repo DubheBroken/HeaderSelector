@@ -30,7 +30,7 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <activity android:name=".MainActivity">
+        <activity android:name="com.dubhe.simple.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,7 +39,13 @@
         </activity>
 
         <activity
+            android:name="com.dubhe.simple.MainActivity_kotlin"
+            android:screenOrientation="portrait" />
+        <activity
             android:name="com.dubhe.wang.ClipImageActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.dubhe.simple.MainActivity_java"
             android:screenOrientation="portrait" />
 
     </application>
