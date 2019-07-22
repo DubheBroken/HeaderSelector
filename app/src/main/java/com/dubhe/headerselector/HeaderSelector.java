@@ -44,10 +44,10 @@ import org.jetbrains.annotations.Nullable;
 import static android.app.Activity.RESULT_OK;
 
 public class HeaderSelector {
-    private boolean enableClip;
-    private OnProcessFinishListener onProcessFinishListener;
-    private int clipMode;
-    private Dialog imageSelectDialog;
+    private boolean enableClip;//是否启动裁剪
+    private OnProcessFinishListener onProcessFinishListener;//操作完成监听
+    private int clipMode = ClipImageActivity.TYPE_CIRCLE;//裁剪模式，默认圆形模式
+    private Dialog imageSelectDialog;//图片选择Dialog
     private AppCompatActivity mActivity;
     private static HeaderSelector instance;
 
@@ -68,8 +68,7 @@ public class HeaderSelector {
         return this;
     }
 
-    public HeaderSelector setOnProcessFinishListener(@NotNull HeaderSelector.OnProcessFinishListener listener) {
-        Intrinsics.checkParameterIsNotNull(listener, "listener");
+    public HeaderSelector setOnProcessFinishListener(HeaderSelector.OnProcessFinishListener listener) {
         this.onProcessFinishListener = listener;
         return this;
     }
@@ -79,6 +78,9 @@ public class HeaderSelector {
         return this;
     }
 
+    /**
+     * 回收数据，在调用的Activity的onDestroy中调用此方法
+     */
     public final void clear() {
         if (instance != null) {
             instance.enableClip = false;
@@ -88,6 +90,9 @@ public class HeaderSelector {
         instance = null;
     }
 
+    /**
+     * 显示图片选择Dialog
+     */
     public final void showImageSelectMenu() {
         imageSelectDialog.show();
         imageSelectDialog.setCanceledOnTouchOutside(true);//点击窗口外消失
@@ -99,18 +104,19 @@ public class HeaderSelector {
         fromAlbum.setOnClickListener(onClickListener);
     }
 
+    /**
+     * 打开相机
+     */
     @SuppressLint({"LongLogTag"})
-    private final void openCamera() {
+    private void openCamera() {
         Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-        File oriPhotoFile = (File) null;
-
+        File oriPhotoFile = null;
         try {
             oriPhotoFile = this.createOriImageFile();
-        } catch (IOException var5) {
+        } catch (IOException e) {
             this.showErrorMessage(Path.FILE_SYSTEM_FAIL);
-            var5.printStackTrace();
+            e.printStackTrace();
         }
-
         if (oriPhotoFile != null) {
             if (VERSION.SDK_INT < 24) {
                 Path.imgUriOri = Uri.fromFile(oriPhotoFile);
@@ -122,49 +128,76 @@ public class HeaderSelector {
             intent.putExtra("output", Path.imgUriOri);
             try {
                 this.mActivity.startActivityForResult(intent, Path.REQUEST_OPEN_CAMERA);
-            } catch (Exception var4) {
+            } catch (Exception e) {
                 this.showErrorMessage(Path.CAMERA_OPEN_FAIL);
-                var4.printStackTrace();
+                e.printStackTrace();
             }
         }
 
     }
 
+    /**
+     * 显示错误信息Toast
+     *
+     * @param errorCode 错误码在Path文件中
+     */
     private void showErrorMessage(int errorCode) {
-        String message = (String) null;
-        if (errorCode == Path.CAMERA_OPEN_FAIL) {
-            message = "打开相机失败，请允许相机权限";
-        } else if (errorCode == Path.FILE_SYSTEM_FAIL) {
-            message = "保存照片失败，请允许文件存储权限";
-        } else if (errorCode == Path.INTERNET_ERROR) {
-            message = "连接服务器失败，请检查网络";
-        } else if (errorCode == Path.SERVER_ERROR) {
-            message = "服务器异常，请联系管理员";
+        String message = null;
+        switch (errorCode) {
+            case Path.CAMERA_OPEN_FAIL:
+                message = "打开相机失败，请允许相机权限";
+                break;
+            case Path.FILE_SYSTEM_FAIL:
+                message = "保存照片失败，请允许文件存储权限";
+                break;
+            case Path.INTERNET_ERROR:
+                message = "连接服务器失败，请检查网络";
+                break;
+            case Path.SERVER_ERROR:
+                message = "服务器异常，请联系管理员";
+                break;
         }
-        Toast.makeText(this.mActivity, message, Toast.LENGTH_SHORT).show();
+        if (message != null) {
+            Toast.makeText(this.mActivity, message, Toast.LENGTH_SHORT).show();
+        }
     }
 
+    /**
+     * 新建图片文件
+     *
+     * @return 新建的图片文件
+     * @throws IOException 可能发生的IO异常
+     */
     @SuppressLint("SimpleDateFormat")
     private File createOriImageFile() throws IOException {
         String imgNameOri = "Pic" + (new SimpleDateFormat("yyyyMMddHHmmss")).format(new Date());
-        File var10002 = this.mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File pictureDirOri = new File(Intrinsics.stringPlus(var10002 != null ? var10002.getAbsolutePath() : null, "/OriPicture"));
+        File file = this.mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File pictureDirOri = new File(Intrinsics.stringPlus(file != null ? file.getAbsolutePath() : null, "/OriPicture"));
         if (!pictureDirOri.exists()) {
             pictureDirOri.mkdirs();
         }
-
         File image = File.createTempFile(imgNameOri, ".jpg", pictureDirOri);
         Intrinsics.checkExpressionValueIsNotNull(image, "image");
         Path.imgPathOri = image.getAbsolutePath();
         return image;
     }
 
-    private final void openAlbum() {
+    /**
+     * 打开系统相册
+     */
+    private void openAlbum() {
         Intent intent = new Intent("android.intent.action.GET_CONTENT");
         intent.setType("image/*");
         this.mActivity.startActivityForResult(intent, Path.REQUEST_SYSTEM_PIC);
     }
 
+    /**
+     * 在调用的activity的onActivityResult调用此方法
+     * or
+     * 在调用的Fragment的父Activity的onActivityResult调用此方法
+     *
+     * @params 此处原样传入onActivityResult的参数
+     */
     public void onHeaderResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
@@ -208,7 +241,12 @@ public class HeaderSelector {
         }
     }
 
-    public final void gotoClipActivity(@Nullable Uri uri) {
+    /**
+     * 启动裁图界面
+     *
+     * @param uri 相册or相机返回的Uri
+     */
+    public void gotoClipActivity(@Nullable Uri uri) {
         if (uri != null) {
             Intent intent = new Intent();
             intent.setClass(this.mActivity, ClipImageActivity.class);
@@ -219,7 +257,14 @@ public class HeaderSelector {
         }
     }
 
-    public HeaderSelector(@NotNull AppCompatActivity mActivity) {
+    /**
+     * 初始化方法
+     *
+     * @param mActivity 调用此选择器的Activity
+     *                  or
+     *                  调用此选择器的Fragment所在的Activity
+     */
+    private HeaderSelector(AppCompatActivity mActivity) {
         imageSelectDialog = new Dialog(mActivity, R.style.BottomDialog);
         Window window = imageSelectDialog.getWindow();
         imageSelectDialog.setContentView(R.layout.image_select_bottom_menu);
@@ -235,6 +280,9 @@ public class HeaderSelector {
         this.mActivity = mActivity;
     }
 
+    /**
+     * 弹出Dialog的点击监听
+     */
     private OnClickListener onClickListener = v -> {
         switch (v.getId()) {
             case R.id.linear_camera: {
@@ -257,7 +305,15 @@ public class HeaderSelector {
         }
     };
 
-    public static HeaderSelector getInstance(@NotNull AppCompatActivity mActivity) {
+    /**
+     * 单例模式取对象不解释
+     *
+     * @param mActivity 调用此选择器的Activity
+     *                  or
+     *                  调用此选择器的Fragment所在的Activity
+     * @return 单例对象
+     */
+    public static HeaderSelector getInstance(AppCompatActivity mActivity) {
         if (instance == null || instance.mActivity == null) {
             instance = new HeaderSelector(mActivity);
         }

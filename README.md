@@ -2,7 +2,7 @@
 【Android】弹框图片选择器，支持裁剪圆形矩形和矩形裁剪  
 
 ### 配置
-Android `7.0`以上，在`manifest`的`application`下(和`activity`同级)加入以下代码
+`Android 7.0`以上，在`manifest`的`application`下(和`activity`同级)加入以下代码
 
 ```xml
 <provider
@@ -33,6 +33,7 @@ Android `7.0`以上，在`manifest`的`application`下(和`activity`同级)加�
 ```
 
 ### 初始化
+支持链式调用
 ```java
 HeaderSelector.getInstance(mActivity)//初始化图片选择器对象，参数是Activity
               .setEnableClip(true)//是否裁剪图片
@@ -61,6 +62,12 @@ protected void onActivityResult(int requestCode, int resultCode, @Nullable Inten
 最终选择/裁剪后得到的图片`path`将从`onProcessFinish`方法中返回
 ```java
 HeaderSelector.getInstance(this).showImageSelectMenu();//显示图片选择器
+```
+
+### 回收
+在调用的`Activity`的`onDestroy`方法中调用以下方法避免报空并回收资源
+```java
+HeaderSelector.getInstance(this).clear();
 ```
 
 ### 注意事项
