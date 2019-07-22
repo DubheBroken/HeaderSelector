@@ -61,13 +61,13 @@ protected void onActivityResult(int requestCode, int resultCode, @Nullable Inten
 ### 启动选择器
 最终选择/裁剪后得到的图片`path`将从`onProcessFinish`方法中返回
 ```java
-HeaderSelector.getInstance(this).showImageSelectMenu();//显示图片选择器
+HeaderSelector.getInstance(mActivity).showImageSelectMenu();//显示图片选择器
 ```
 
 ### 回收
 在调用的`Activity`的`onDestroy`方法中调用以下方法避免报空并回收资源
 ```java
-HeaderSelector.getInstance(this).clear();
+HeaderSelector.getInstance(mActivity).clear();
 ```
 
 ### 注意事项
