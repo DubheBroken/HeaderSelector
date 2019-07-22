@@ -67,10 +67,15 @@ HeaderSelector.getInstance(mActivity).showImageSelectMenu();//显示图片选择
 ### 回收
 在调用的`Activity`的`onDestroy`方法中调用以下方法避免报空并回收资源
 ```java
-HeaderSelector.getInstance(mActivity).clear();
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    HeaderSelector.getInstance(this).clear();
+}
 ```
 
 ### 注意事项
-裁剪器的圆形矩形仅为裁剪框的形状，仅便于用户定位，并不会改变图片的形状。如果要显示圆形的图片请使用圆形的ImageView
+裁剪器的圆形矩形仅为裁剪框的形状，仅便于用户定位，并不会改变图片的形状。  
+**如果要显示圆形的图片请使用圆形的ImageView。**
 
 
