@@ -6,14 +6,14 @@ Android `7.0`以上，在`manifest`的`application`下(和`activity`同级)加�
 
 ```xml
 <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileProvider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths" />
-        </provider>
+    android:name="androidx.core.content.FileProvider"
+    android:authorities="${applicationId}.fileProvider"
+    android:exported="false"
+    android:grantUriPermissions="true">
+    <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/provider_paths" />
+</provider>
 ```
 并在`res`下新建`xml`目录，新建`provider_paths.xml`文件，内容如下：  
 其中的`com.dubhe.headerselector`建议替换为你自己的项目名称。
@@ -29,38 +29,32 @@ Android `7.0`以上，在`manifest`的`application`下(和`activity`同级)加�
     <external-files-path
         name="images"
         path="files/Pictures/OriPicture" />
-    <root-path
-        name="images"
-        path="" />
-    <root-path
-        name="images"
-        path="" />
 </paths>
 ```
 
 ### 初始化
 ```java
- HeaderSelector.getInstance(this)//初始化图片选择器对象，参数是Activity
-                .setEnableClip(true)//是否裁剪图片
-                .setClipMode(ClipImageActivity.TYPE_CIRCLE)//裁图模式 TYPE_CIRCLE圆形 TYPE_RECTANGLE矩形
-                .setOnProcessFinishListener(new HeaderSelector.OnProcessFinishListener() {
-                    //完成所有操作后返回最终结果的path
-                    //TODO:不set将会导致无法拿到返回结果
-                    @Override
-                    public void onProcessFinish(String path) {
-                        //TODO:拿到path进行逻辑操作
-                    }
-                });
+HeaderSelector.getInstance(mActivity)//初始化图片选择器对象，参数是Activity
+              .setEnableClip(true)//是否裁剪图片
+              .setClipMode(ClipImageActivity.TYPE_CIRCLE)//裁图模式 TYPE_CIRCLE圆形 TYPE_RECTANGLE矩形
+              .setOnProcessFinishListener(new HeaderSelector.OnProcessFinishListener() {
+                  //完成所有操作后返回最终结果的path
+                  //TODO:不set将会导致无法拿到返回结果
+                  @Override
+                  public void onProcessFinish(String path) {
+                       //TODO:拿到path进行逻辑操作
+                  }
+              });
 ```
 
 ### 接收回调
 重写`onActivityResult`方法来接收回调数据，若在`Fragment`中使用则重写所在`Activity`的`onActivityResult`
 ```java
- @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        HeaderSelector.getInstance(this).onHeaderResult(requestCode, resultCode, data);
-    }
+@Override
+protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    HeaderSelector.getInstance(mActivity).onHeaderResult(requestCode, resultCode, data);
+}
 ``` 
 
 ### 启动选择器
