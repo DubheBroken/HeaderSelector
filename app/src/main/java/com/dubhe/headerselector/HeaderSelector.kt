@@ -73,10 +73,8 @@ class HeaderSelector(private var mActivity: AppCompatActivity) {
         private var instance: HeaderSelector? = null
 
         fun getInstance(mActivity: AppCompatActivity): HeaderSelector {
-            if (instance == null) {
+            if (instance == null || instance?.mActivity == null) {
                 instance = HeaderSelector(mActivity)
-            } else {
-                instance?.setToDefault()
             }
             return instance as HeaderSelector
         }
@@ -133,8 +131,16 @@ class HeaderSelector(private var mActivity: AppCompatActivity) {
             R.id.linear_album -> {
                 //点击弹出框中的相册
                 imageSelectDialog.dismiss()
-                if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(mActivity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+                if (ContextCompat.checkSelfPermission(
+                                mActivity,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                            mActivity,
+                            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                            1
+                    )
                 } else {
 //                    打开系统相册
                     openAlbum()
@@ -203,7 +209,8 @@ class HeaderSelector(private var mActivity: AppCompatActivity) {
     @Throws(IOException::class)
     private fun createOriImageFile(): File {
         val imgNameOri = "Pic" + SimpleDateFormat("yyyyMMddHHmmss").format(Date())
-        val pictureDirOri = File(mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath + "/OriPicture")
+        val pictureDirOri =
+                File(mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath + "/OriPicture")
         if (!pictureDirOri.exists()) {
             pictureDirOri.mkdirs()
         }

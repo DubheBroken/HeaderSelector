@@ -6,7 +6,7 @@
     android:background="@android:color/black"
     android:orientation="vertical">
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/white">
@@ -31,7 +31,7 @@
             android:layout_margin="0dp"
             android:gravity="center"
             android:text="移动和缩放"
-            android:textColor="@color/pickerview_topbar_title"
+            android:textColor="@color/black3"
             android:textSize="15sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -50,7 +50,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!--圆形裁剪框示例
         app:clipBorderWidth="5dp"     ： 裁剪框边框宽度
