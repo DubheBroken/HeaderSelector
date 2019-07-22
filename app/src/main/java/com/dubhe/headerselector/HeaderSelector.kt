@@ -39,7 +39,6 @@ import java.util.*
 class HeaderSelector(private var mActivity: AppCompatActivity) {
 
     var enableClip = false //是否裁剪图片
-    var enableZip = false//是否压缩图片
     var onProcessFinishListener: OnProcessFinishListener? = null//TODO:这个监听器必须不为空，否则将无法返回最终结果给调用者
     var clipMode = ClipImageActivity.TYPE_CIRCLE//裁图模式，默认圆形
     private var imageSelectDialog = Dialog(mActivity, R.style.BottomDialog)
@@ -50,11 +49,6 @@ class HeaderSelector(private var mActivity: AppCompatActivity) {
 
     fun setEnableClip(b: Boolean): HeaderSelector {
         this.enableClip = b
-        return this
-    }
-
-    fun setEnableZip(b: Boolean): HeaderSelector {
-        this.enableZip = b
         return this
     }
 
@@ -95,13 +89,13 @@ class HeaderSelector(private var mActivity: AppCompatActivity) {
     }
 
     /**
-     * 回到默认状态
+     * 清除配置，在Activity Destroy时调用
      */
-    fun setToDefault() {
+    fun clear() {
         instance?.enableClip = false
-        instance?.enableZip = false
         instance?.clipMode = ClipImageActivity.TYPE_CIRCLE
         instance?.onProcessFinishListener = null
+        instance = null
     }
 
     /**
@@ -111,10 +105,8 @@ class HeaderSelector(private var mActivity: AppCompatActivity) {
         imageSelectDialog.show()
         imageSelectDialog.setCanceledOnTouchOutside(true)//点击窗口外消失
 
-        val fromCamera =
-                imageSelectDialog.window!!.findViewById<LinearLayout>(R.id.linear_camera)
-        val fromAlbum =
-                imageSelectDialog.window!!.findViewById<LinearLayout>(R.id.linear_album)
+        val fromCamera = imageSelectDialog.window!!.findViewById<LinearLayout>(R.id.linear_camera)
+        val fromAlbum = imageSelectDialog.window!!.findViewById<LinearLayout>(R.id.linear_album)
 
         fromCamera.setOnClickListener(onClickListener)
         fromAlbum.setOnClickListener(onClickListener)
@@ -131,16 +123,8 @@ class HeaderSelector(private var mActivity: AppCompatActivity) {
             R.id.linear_album -> {
                 //点击弹出框中的相册
                 imageSelectDialog.dismiss()
-                if (ContextCompat.checkSelfPermission(
-                                mActivity,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    ActivityCompat.requestPermissions(
-                            mActivity,
-                            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                            1
-                    )
+                if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(mActivity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
                 } else {
 //                    打开系统相册
                     openAlbum()
@@ -169,9 +153,14 @@ class HeaderSelector(private var mActivity: AppCompatActivity) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
                 imgUriOri = Uri.fromFile(oriPhotoFile)
             } else {
-                imgUriOri = FileProvider.getUriForFile(mActivity, "${mActivity.packageName}.fileProvider", oriPhotoFile)
+                imgUriOri = FileProvider.getUriForFile(
+                        mActivity,
+                        "${mActivity.packageName}.fileProvider",
+                        oriPhotoFile
+                )
             }
-            intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            intent.flags =
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             intent.putExtra(MediaStore.EXTRA_OUTPUT, imgUriOri)
             try {
                 mActivity.startActivityForResult(intent, REQUEST_OPEN_CAMERA)
