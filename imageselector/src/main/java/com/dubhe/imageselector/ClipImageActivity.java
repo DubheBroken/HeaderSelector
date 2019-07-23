@@ -1,4 +1,4 @@
-package com.dubhe.wang;
+package com.dubhe.imageselector;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -12,10 +12,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.dubhe.headerselector.R;
 import com.dubhe.wang.view.ClipViewLayout;
 
 import java.io.File;

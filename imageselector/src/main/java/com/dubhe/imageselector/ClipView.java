@@ -1,4 +1,4 @@
-package com.dubhe.wang.view;
+package com.dubhe.imageselector;
 
 import android.content.Context;
 import android.graphics.Canvas;

@@ -1,4 +1,4 @@
-package com.dubhe.wang.view;
+package com.dubhe.imageselector;
 
 /*
  * Copyright 2014 - 2016 Henning Dodenhof
@@ -32,14 +32,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.appcompat.widget.AppCompatImageView;
-
-import com.dubhe.headerselector.R;
 
 
 /**
@@ -47,7 +44,7 @@ import com.dubhe.headerselector.R;
  */
 public class CircleImageView extends AppCompatImageView {
 
-    private static final ImageView.ScaleType SCALE_TYPE = ImageView.ScaleType.CENTER_CROP;
+    private static final ScaleType SCALE_TYPE = ScaleType.CENTER_CROP;
 
     private static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.ARGB_8888;
     private static final int COLORDRAWABLE_DIMENSION = 2;
@@ -120,12 +117,12 @@ public class CircleImageView extends AppCompatImageView {
     }
 
     @Override
-    public ImageView.ScaleType getScaleType() {
+    public ScaleType getScaleType() {
         return SCALE_TYPE;
     }
 
     @Override
-    public void setScaleType(ImageView.ScaleType scaleType) {
+    public void setScaleType(ScaleType scaleType) {
         if (scaleType != SCALE_TYPE) {
             throw new IllegalArgumentException(String.format("ScaleType %s not supported.", scaleType));
         }

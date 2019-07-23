@@ -1,4 +1,4 @@
-package com.dubhe.wang.view;
+package com.dubhe.imageselector;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -18,8 +18,6 @@ import android.view.MotionEvent;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-
-import com.dubhe.headerselector.R;
 
 import java.io.IOException;
 

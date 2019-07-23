@@ -1,19 +1,14 @@
-package com.dubhe.headerselector;
+package com.dubhe.imageselector;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.Parcelable;
 import android.os.Build.VERSION;
-import android.text.Layout;
 import android.view.Gravity;
-import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -26,36 +21,33 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
-import com.dubhe.wang.ClipImageActivity;
+import com.dubhe.headerselector.ImageUtils;
+import com.dubhe.headerselector.Path;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import kotlin.Metadata;
-import kotlin.jvm.JvmStatic;
 import kotlin.jvm.internal.Intrinsics;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static android.app.Activity.RESULT_OK;
 
-public class HeaderSelector {
+public class ImageSelector {
     private boolean enableClip;//是否启动裁剪
     private OnProcessFinishListener onProcessFinishListener;//操作完成监听
     private int clipMode = ClipImageActivity.TYPE_CIRCLE;//裁剪模式，默认圆形模式
     private Dialog imageSelectDialog;//图片选择Dialog
     private AppCompatActivity mActivity;
-    private static HeaderSelector instance;
+    private static ImageSelector instance;
 
     public boolean getEnableClip() {
         return this.enableClip;
     }
 
-    public HeaderSelector.OnProcessFinishListener getOnProcessFinishListener() {
+    public ImageSelector.OnProcessFinishListener getOnProcessFinishListener() {
         return this.onProcessFinishListener;
     }
 
@@ -63,17 +55,17 @@ public class HeaderSelector {
         return this.clipMode;
     }
 
-    public HeaderSelector setEnableClip(boolean b) {
+    public ImageSelector setEnableClip(boolean b) {
         this.enableClip = b;
         return this;
     }
 
-    public HeaderSelector setOnProcessFinishListener(HeaderSelector.OnProcessFinishListener listener) {
+    public ImageSelector setOnProcessFinishListener(ImageSelector.OnProcessFinishListener listener) {
         this.onProcessFinishListener = listener;
         return this;
     }
 
-    public HeaderSelector setClipMode(int mode) {
+    public ImageSelector setClipMode(int mode) {
         this.clipMode = mode;
         return this;
     }
@@ -264,7 +256,7 @@ public class HeaderSelector {
      *                  or
      *                  调用此选择器的Fragment所在的Activity
      */
-    private HeaderSelector(AppCompatActivity mActivity) {
+    private ImageSelector(AppCompatActivity mActivity) {
         imageSelectDialog = new Dialog(mActivity, R.style.BottomDialog);
         Window window = imageSelectDialog.getWindow();
         imageSelectDialog.setContentView(R.layout.image_select_bottom_menu);
@@ -284,23 +276,17 @@ public class HeaderSelector {
      * 弹出Dialog的点击监听
      */
     private OnClickListener onClickListener = v -> {
-        switch (v.getId()) {
-            case R.id.linear_camera: {
-                //点击弹出框中的相机按钮
-                imageSelectDialog.dismiss();
-                openCamera();
-                break;
-            }
-            case R.id.linear_album: {
-                //点击弹出框中的相册
-                imageSelectDialog.dismiss();
-                if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                } else {
+        int id = v.getId();
+        if (id == R.id.linear_camera) {//点击弹出框中的相机按钮
+            imageSelectDialog.dismiss();
+            openCamera();
+        } else if (id == R.id.linear_album) {//点击弹出框中的相册
+            imageSelectDialog.dismiss();
+            if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            } else {
 //                    打开系统相册
-                    openAlbum();
-                }
-                break;
+                openAlbum();
             }
         }
     };
@@ -313,9 +299,9 @@ public class HeaderSelector {
      *                  调用此选择器的Fragment所在的Activity
      * @return 单例对象
      */
-    public static HeaderSelector getInstance(AppCompatActivity mActivity) {
+    public static ImageSelector getInstance(AppCompatActivity mActivity) {
         if (instance == null || instance.mActivity == null) {
-            instance = new HeaderSelector(mActivity);
+            instance = new ImageSelector(mActivity);
         }
         return instance;
     }

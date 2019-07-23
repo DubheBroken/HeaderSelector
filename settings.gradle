@@ -1,2 +1,3 @@
 rootProject.name='HeaderSelector'
 include ':app'
+include ':imageselector'
