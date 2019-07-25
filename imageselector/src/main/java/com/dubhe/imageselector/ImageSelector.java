@@ -198,7 +198,8 @@ public class ImageSelector {
                     if (this.enableClip) {
                         this.gotoClipActivity(Path.imgUriOri);
                     } else if (this.onProcessFinishListener != null) {
-                        onProcessFinishListener.onProcessFinish(ImageUtils.getRealPathFromUri(mActivity, Path.imgUriOri));
+//                        onProcessFinishListener.onProcessFinish(ImageUtils.getRealPathFromUri(mActivity, Path.imgUriOri));
+                        onProcessFinishListener.onProcessFinish(Path.imgPathOri);
                     }
                     break;
                 }
