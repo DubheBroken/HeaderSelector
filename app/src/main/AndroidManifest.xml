@@ -42,7 +42,7 @@
             android:name="com.dubhe.simple.MainActivity_kotlin"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.dubhe.wang.ClipImageActivity"
+            android:name="com.dubhe.imageselector.ClipImageActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name="com.dubhe.simple.MainActivity_java"

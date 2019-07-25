@@ -9,4 +9,10 @@
     <external-files-path
         name="images"
         path="files/Pictures/OriPicture" />
+    <root-path
+        name="images"
+        path="" />
+    <root-path
+        name="images"
+        path="" />
 </paths>

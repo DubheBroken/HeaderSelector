@@ -66,4 +66,15 @@
         app:clipType="circle"
         app:mHorizontalPadding="30dp" />
 
+    <!--矩形裁剪框示例 -->
+    <com.dubhe.imageselector.ClipViewLayout
+        android:id="@+id/clipViewLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+        app:clipBorderWidth="2dp"
+        app:clipType="rectangle"
+        app:mHorizontalPadding="30dp" />
+
 </LinearLayout>

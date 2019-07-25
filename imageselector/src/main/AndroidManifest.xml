@@ -1,2 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.dubhe.imageselector" />
+    package="com.dubhe.imageselector" >
+
+    <application>
+        <activity android:name=".ClipImageActivity" />
+    </application>
+</manifest>

@@ -14,8 +14,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.dubhe.wang.view.ClipViewLayout;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -85,13 +83,11 @@ public class ClipImageActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.iv_back:
-                finish();
-                break;
-            case R.id.iv_ok:
-                generateUriAndReturn();
-                break;
+        int id = v.getId();
+        if (id == R.id.iv_back) {
+            finish();
+        } else if (id == R.id.iv_ok) {
+            generateUriAndReturn();
         }
     }
 
