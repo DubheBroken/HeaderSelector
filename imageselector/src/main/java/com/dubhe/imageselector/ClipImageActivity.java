@@ -52,14 +52,12 @@ public class ClipImageActivity extends AppCompatActivity implements View.OnClick
      */
     public void initView() {
         clipViewLayout1 = findViewById(R.id.clipViewLayout1);
-        clipViewLayout2 = findViewById(R.id.clipViewLayout2);
         ivBack = findViewById(R.id.iv_back);
         ivOk = findViewById(R.id.iv_ok);
         //设置点击事件监听器
         ivBack.setOnClickListener(this);
         ivOk.setOnClickListener(this);
         stockName = findViewById(R.id.stock_name);
-        clipViewLayout1 = findViewById(R.id.clipViewLayout1);
         clipViewLayout2 = findViewById(R.id.clipViewLayout2);
 
 //        initStatusBar(false);

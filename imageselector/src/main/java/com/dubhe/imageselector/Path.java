@@ -1,4 +1,4 @@
-package com.dubhe.headerselector;
+package com.dubhe.imageselector;
 
 import android.net.Uri;
 

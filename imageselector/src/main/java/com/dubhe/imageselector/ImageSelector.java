@@ -3,6 +3,7 @@ package com.dubhe.imageselector;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -10,24 +11,26 @@ import android.os.Environment;
 import android.os.Build.VERSION;
 import android.view.Gravity;
 import android.view.Window;
-import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.dubhe.headerselector.ImageUtils;
-import com.dubhe.headerselector.Path;
+import com.rice.riceframe.R;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import kotlin.jvm.internal.Intrinsics;
 
@@ -41,7 +44,25 @@ public class ImageSelector {
     private int clipMode = ClipImageActivity.TYPE_CIRCLE;//裁剪模式，默认圆形模式
     private Dialog imageSelectDialog;//图片选择Dialog
     private AppCompatActivity mActivity;
+    private Fragment mFragment;
     private static ImageSelector instance;
+    private OptionAdapter optionAdapter;
+    private List<ImgTextOptionModel> listOptions = new ArrayList<>();
+    private Context mContext;
+    private OnCustomItemClickListener onCustomItemClickListener;
+
+    public interface OnCustomItemClickListener {
+        void onCustomItemClick(String text, int position);
+    }
+
+    public OnCustomItemClickListener getOnCustomItemClickListener() {
+        return onCustomItemClickListener;
+    }
+
+    public ImageSelector setOnCustomItemClickListener(OnCustomItemClickListener onCustomItemClickListener) {
+        this.onCustomItemClickListener = onCustomItemClickListener;
+        return this;
+    }
 
     public boolean getEnableClip() {
         return this.enableClip;
@@ -88,12 +109,6 @@ public class ImageSelector {
     public final void showImageSelectMenu() {
         imageSelectDialog.show();
         imageSelectDialog.setCanceledOnTouchOutside(true);//点击窗口外消失
-
-        LinearLayout fromCamera = imageSelectDialog.getWindow().findViewById(R.id.linear_camera);
-        LinearLayout fromAlbum = imageSelectDialog.getWindow().findViewById(R.id.linear_album);
-
-        fromCamera.setOnClickListener(onClickListener);
-        fromAlbum.setOnClickListener(onClickListener);
     }
 
     /**
@@ -119,7 +134,11 @@ public class ImageSelector {
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intent.putExtra("output", Path.imgUriOri);
             try {
-                this.mActivity.startActivityForResult(intent, Path.REQUEST_OPEN_CAMERA);
+                if (mFragment != null) {
+                    this.mFragment.startActivityForResult(intent, Path.REQUEST_OPEN_CAMERA);
+                } else {
+                    this.mActivity.startActivityForResult(intent, Path.REQUEST_OPEN_CAMERA);
+                }
             } catch (Exception e) {
                 this.showErrorMessage(Path.CAMERA_OPEN_FAIL);
                 e.printStackTrace();
@@ -178,9 +197,14 @@ public class ImageSelector {
      * 打开系统相册
      */
     private void openAlbum() {
-        Intent intent = new Intent("android.intent.action.GET_CONTENT");
+//        Intent intent = new Intent("android.intent.action.GET_CONTENT");
+        Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
-        this.mActivity.startActivityForResult(intent, Path.REQUEST_SYSTEM_PIC);
+        if (mFragment != null) {
+            this.mFragment.startActivityForResult(intent, Path.REQUEST_SYSTEM_PIC);
+        } else {
+            this.mActivity.startActivityForResult(intent, Path.REQUEST_SYSTEM_PIC);
+        }
     }
 
     /**
@@ -246,7 +270,11 @@ public class ImageSelector {
             intent.putExtra("type", this.clipMode);
             intent.putExtra("path", Path.imgPathOri);
             intent.setData(uri);
-            this.mActivity.startActivityForResult(intent, Path.REQUEST_CROP_PHOTO);
+            if (mFragment != null) {
+                this.mFragment.startActivityForResult(intent, Path.REQUEST_CROP_PHOTO);
+            } else {
+                this.mActivity.startActivityForResult(intent, Path.REQUEST_CROP_PHOTO);
+            }
         }
     }
 
@@ -258,7 +286,16 @@ public class ImageSelector {
      *                  调用此选择器的Fragment所在的Activity
      */
     private ImageSelector(AppCompatActivity mActivity) {
-        imageSelectDialog = new Dialog(mActivity, R.style.BottomDialog);
+        this.mActivity = mActivity;
+        this.mContext = mActivity;
+        init();
+    }
+
+    /**
+     * 初始化方法
+     */
+    private void init() {
+        imageSelectDialog = new Dialog(mContext, R.style.BottomDialog);
         Window window = imageSelectDialog.getWindow();
         imageSelectDialog.setContentView(R.layout.image_select_bottom_menu);
         window.setGravity(Gravity.BOTTOM);
@@ -270,27 +307,80 @@ public class ImageSelector {
         //设置高
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         window.setAttributes(lp);
-        this.mActivity = mActivity;
+        RecyclerView recycler = imageSelectDialog.getWindow().findViewById(R.id.recycler);
+        recycler.setLayoutManager(new LinearLayoutManager(mContext));
+        listOptions.add(new ImgTextOptionModel(R.drawable.vec_camera_black, "拍照"));
+        listOptions.add(new ImgTextOptionModel(R.drawable.vec_btn_album_black, "相册"));
+        optionAdapter = new OptionAdapter(mContext, listOptions);
+        optionAdapter.setOnItemClickListener((adapter, view, position) -> {
+            switch (position) {
+                case 0: {
+                    //拍照
+                    if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.CAMERA}, 1);
+                    } else {
+//                    打开系统相机
+                        openCamera();
+                    }
+                    break;
+                }
+                case 1: {
+                    //相册
+                    if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                    } else {
+//                    打开系统相册
+                        openAlbum();
+                    }
+                    break;
+                }
+                default: {
+                    if (onCustomItemClickListener != null) {
+                        onCustomItemClickListener.onCustomItemClick(listOptions.get(position).getText(), position);
+                    }
+                    break;
+                }
+            }
+            imageSelectDialog.dismiss();
+        });
+        recycler.setAdapter(optionAdapter);
     }
 
     /**
-     * 弹出Dialog的点击监听
+     * 添加一个选项到底部
+     *
+     * @return
      */
-    private OnClickListener onClickListener = v -> {
-        int id = v.getId();
-        if (id == R.id.linear_camera) {//点击弹出框中的相机按钮
-            imageSelectDialog.dismiss();
-            openCamera();
-        } else if (id == R.id.linear_album) {//点击弹出框中的相册
-            imageSelectDialog.dismiss();
-            if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-            } else {
-//                    打开系统相册
-                openAlbum();
-            }
-        }
-    };
+    public ImageSelector addItem(ImgTextOptionModel model) {
+        listOptions.add(model);
+        optionAdapter.notifyDataSetChanged();
+        return this;
+    }
+
+    /**
+     * 剔除指定选项
+     *
+     * @return
+     */
+    public ImageSelector removeItem(ImgTextOptionModel model) {
+        listOptions.remove(model);
+        optionAdapter.notifyDataSetChanged();
+        return this;
+    }
+
+    /**
+     * 初始化方法
+     *
+     * @param mFragment 调用此选择器的Activity
+     *                  or
+     *                  调用此选择器的Fragment所在的Activity
+     */
+    private ImageSelector(Fragment mFragment) {
+        this.mFragment = mFragment;
+        this.mActivity = (AppCompatActivity) mFragment.getActivity();
+        this.mContext = mFragment.getActivity();
+        init();
+    }
 
     /**
      * 单例模式取对象不解释
@@ -301,8 +391,22 @@ public class ImageSelector {
      * @return 单例对象
      */
     public static ImageSelector getInstance(AppCompatActivity mActivity) {
-        if (instance == null || instance.mActivity == null) {
+        if (instance == null || instance.mActivity == null || instance.mActivity != mActivity) {
             instance = new ImageSelector(mActivity);
+        }
+        return instance;
+    }
+
+    /**
+     * 单例模式取对象不解释
+     *
+     * @param mFragment 调用此选择器的Fragment
+     * @return 单例对象
+     */
+    public static ImageSelector getInstance(Fragment mFragment) {
+        if (instance == null || instance.mFragment == null || instance.mFragment != mFragment) {
+            instance = new ImageSelector(mFragment);
+            instance.mActivity = (AppCompatActivity) mFragment.getActivity();
         }
         return instance;
     }
