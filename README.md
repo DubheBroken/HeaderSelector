@@ -35,7 +35,7 @@
 ### 初始化
 支持链式调用
 ```java
-HeaderSelector.getInstance(mActivity)//初始化图片选择器对象，参数是Activity
+ImageSelector.getInstance(mActivity)//初始化图片选择器对象，参数是Activity或Fragment对象
               .setEnableClip(true)//是否裁剪图片
               .setClipMode(ClipImageActivity.TYPE_CIRCLE)//裁图模式 TYPE_CIRCLE圆形 TYPE_RECTANGLE矩形
               .setOnProcessFinishListener(new HeaderSelector.OnProcessFinishListener() {
@@ -49,33 +49,60 @@ HeaderSelector.getInstance(mActivity)//初始化图片选择器对象，参数�
 ```
 
 ### 接收回调
-重写`onActivityResult`方法来接收回调数据，若在`Fragment`中使用则重写所在`Activity`的`onActivityResult`
+重写`onActivityResult`方法来接收回调数据，写在调用的`Fragment`和`Activity`中。
 ```java
 @Override
 protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
-    HeaderSelector.getInstance(mActivity).onHeaderResult(requestCode, resultCode, data);
+    ImageSelector.getInstance(mActivity).onHeaderResult(requestCode, resultCode, data);
 }
 ``` 
 
 ### 启动选择器
 最终选择/裁剪后得到的图片`path`将从`onProcessFinish`方法中返回
 ```java
-HeaderSelector.getInstance(mActivity).showImageSelectMenu();//显示图片选择器
+ImageSelector.getInstance(mActivity).showImageSelectMenu();//弹出图片选择器菜单
 ```
 
 ### 回收
-在调用的`Activity`的`onDestroy`方法中调用以下方法避免报空并回收资源
+在调用的`Activity`或`Fragment`的`onDestroy`方法中调用以下方法避免报空并回收资源
 ```java
 @Override
 protected void onDestroy() {
     super.onDestroy();
-    HeaderSelector.getInstance(this).clear();
+    ImageSelector.getInstance(this).clear();
 }
 ```
 
 ### 注意事项
-裁剪器的圆形矩形仅为裁剪框的形状，仅便于用户定位，并不会改变图片的形状。  
-**如果要显示圆形的图片请使用圆形的ImageView。**
+裁剪器的圆形矩形仅为裁剪框的形状，仅便于用户定位，并不会把图片内容变成圆形。
+**如果要显示圆形的图片请使用图片加载框架的相关功能**
+例：Glide 4.9加载圆形图片
+```java
+ Glide.with(context).load(url)
+                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                    .into(imageView);
+```
 
-
+### 添加自定义菜单
+若业务需要在点击一个按钮时除了视频和图片以外显示其他的选项（例如文字和图片），可以直接在ImageSelector中添加。
+```java
+ImageSelector.getInstance(mActivity)//初始化图片选择器对象，参数是Activity或Fragment对象
+              .setOnProcessFinishListener(new HeaderSelector.OnProcessFinishListener() {
+                  //完成所有操作后返回最终结果的path
+                  //TODO:不set将会导致无法拿到返回结果
+                  @Override
+                  public void onProcessFinish(String path) {
+                       //TODO:拿到path进行逻辑操作
+                  }
+              });
+              .addItem(ImgTextOptionModel(R.drawable.vec_video_file, "视频"))//第一个参数是图标，第二个参数是文本标签。会添加到底部
+              .setOnCustomItemClickListener { text, position ->
+                    //此处会返回文本标签和位置下标两个参数用于定位，建议使用文本标签进行判断
+                    when (text) {
+                        "视频" -> {
+                            //TODO：进行选择视频的操作
+                        }
+                    }
+                }
+```
